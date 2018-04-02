@@ -7,7 +7,9 @@ fi
 
 install() {
     [ -e /etc/lsb-release ] && ubuntu_install
-    certbot --nginx
+
+    STEP=certbot
+    certbot --nginx || die certbotsetup
 
     # install crontab if not already installed
     crontab -l | grep -q "15 02 * * * `which certbot` renew" || autorenew_crontab
@@ -31,6 +33,8 @@ ubuntu_install_nginx() {
     add-apt-repository "deb-src http://nginx.org/packages/ubuntu/ $(lsb_release -s -c) main" -y || die addreposrc
     apt-get update || die aptupdate
     apt-get install nginx -y || die install
+
+    cat nginx.conf > /etc/nginx/sites-enabled/default
 }
 
 ubuntu_install_certbot() {
