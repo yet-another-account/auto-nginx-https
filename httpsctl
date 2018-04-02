@@ -1,0 +1,50 @@
+#!/bin/bash
+
+if [ "$EUID" -ne 0 ]
+  then echo "This script must be run as root!"
+  exit
+fi
+
+install() {
+    [ -e /etc/lsb-release ] && ubuntu_install
+    certbot --nginx
+
+    # install crontab if not already installed
+    crontab -l | grep -q "15 02 * * * `which certbot` renew" || autorenew_crontab
+}
+
+autorenew_crontab() {
+    (crontab -l 2>/dev/null; echo "15 02 * * * `which certbot` renew --pre-hook \"service nginx stop\" --post-hook \"service nginx start\"") | crontab -
+}
+
+ubuntu_install() {
+    OS=ubuntu
+    ubuntu_install_nginx
+    ubuntu_install_certbot
+}
+
+ubuntu_install_nginx() {
+    STEP=inginx
+    [ `dpkg -l | grep '\snginx\s\s' | wc -l` -eq 1 ] && return
+
+    add-apt-repository "deb http://nginx.org/packages/ubuntu/ $(lsb_release -s -c) main" -y || die addrepo
+    add-apt-repository "deb-src http://nginx.org/packages/ubuntu/ $(lsb_release -s -c) main" -y || die addreposrc
+    apt-get update || die aptupdate
+    apt-get install nginx -y || die install
+}
+
+ubuntu_install_certbot() {
+    step=icertbot
+    [ `dpkg -l | grep '\spython-certbot-nginx\s\s' | wc -l` -eq 1 ] && return
+
+    apt-get install software-properties-common -y || die software-properties-common
+    add-apt-repository ppa:certbot/certbot -y || die ppa
+    apt-get update || die aptupdate
+    apt-get install python-certbot-nginx -y || die install
+}
+
+
+die() {
+    echo "!!! SOMETHING WENT WRONG ($OS $STEP $1) !!!"
+    exit
+}
