@@ -58,3 +58,5 @@ die() {
     echo "!!! SOMETHING WENT WRONG ($OS $STEP $1) !!!"
     exit
 }
+
+install
