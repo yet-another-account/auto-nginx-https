@@ -36,7 +36,6 @@ ubuntu_install_nginx() {
     [ `dpkg -l | grep '\snginx\s\s' | wc -l` -eq 1 ] && return
 
     add-apt-repository "deb http://nginx.org/packages/ubuntu/ $(lsb_release -s -c) main" -y || die addrepo
-    add-apt-repository "deb-src http://nginx.org/packages/ubuntu/ $(lsb_release -s -c) main" -y || die addreposrc
     apt-get update || die aptupdate
     apt-get install nginx -y || die install
 
