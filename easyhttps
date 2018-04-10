@@ -5,10 +5,11 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
-while getopts 'e:d:t' flag; do
+while getopts 'e:d:p:t' flag; do
   case "${flag}" in
     e) EMAIL="${OPTARG}" ;;
     d) DOMAIN="${OPTARG}" ;;
+    p) PORT="${OPTARG}" ;;
     t) TOS="yes" ;;
   esac
 done
@@ -63,6 +64,10 @@ whiptail_ask() {
             whiptail --title "$DIALOG_TITLE" --msgbox "You must accept the Terms of Service to use CertBot!" 8 78
             exit
         fi
+    fi
+
+    if [ -z "$PORT" ]; then
+        PORT=14265
     fi
 
 }
@@ -153,11 +158,11 @@ server_name SERVERNAME;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
 
-    proxy_pass http://localhost:14265;
+    proxy_pass http://localhost:IPORT;
     proxy_read_timeout 90;
   }
 }
-EOF | sed "s/SERVERNAME/$DOMAIN/" > /etc/nginx/sites-enabled/default
+EOF | sed "s/SERVERNAME/$DOMAIN/" | sed "s/IPORT/$PORT/" > /etc/nginx/sites-enabled/default
 }
 
 
