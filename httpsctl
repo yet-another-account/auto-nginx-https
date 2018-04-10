@@ -14,7 +14,7 @@ install() {
 
 setup_certbot() {
     STEP=certbot
-    certbot --nginx --email "$EMAIL" -d "$DOMAINS" || die certbotsetup
+    certbot --nginx --email "$EMAIL" -d "$DOMAIN" || die certbotsetup
 
     # install crontab if not already installed
     crontab -l | grep -q "15 02 * * * `which certbot` renew" || autorenew_crontab
@@ -37,7 +37,7 @@ ubuntu_install() {
         exit
     fi
 
-    DOMAINS=$(whiptail --inputbox 'Enter your domain(s) (NOT IPs!) that point to this IP (comma separated)' 8 78 --title "$DIALOG_TITLE" 3>&1 1>&2 2>&3)
+    DOMAIN=$(whiptail --inputbox 'Enter your domain (NOT IP!) that points to this IP (comma separated)' 8 78 --title "$DIALOG_TITLE" 3>&1 1>&2 2>&3)
 
     if [ $? -ne 0 ]; then
         whiptail --title "$DIALOG_TITLE" --msgbox "You must provide domain(s)!" 8 78
@@ -59,7 +59,7 @@ ubuntu_install_nginx() {
     apt-get update || die aptupdate
     apt-get install nginx -y || die install
 
-    cat nginx.conf > /etc/nginx/sites-enabled/default
+    sed "s/SERVERNAME/$DOMAIN/" < nginx.conf > /etc/nginx/sites-enabled/default
 }
 
 ubuntu_install_certbot() {
