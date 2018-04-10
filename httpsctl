@@ -19,6 +19,7 @@ install() {
     DISTRO=$(grep ^NAME /etc/os-release | sed 's/NAME=//g' | tr -d '="\n')
 
     [ "$DISTRO" = "Ubuntu" ] && ubuntu_install ||
+    [ "$DISTRO" = "Debian" ] && debian_install ||
 
 
     echo "Sorry! This script doesn't support this platform. "
@@ -36,12 +37,7 @@ autorenew_crontab() {
     (crontab -l 2>/dev/null; echo "15 02 * * * `which certbot` renew --pre-hook \"service nginx stop\" --post-hook \"service nginx start\"") | crontab -
 }
 
-ubuntu_install() {
-    OS=ubuntu
-
-    # install whiptail if not present
-    [ `dpkg -l | grep '\swhiptail\s\s' | wc -l` -eq 1 ] || apt-get install whiptail
-
+whiptail_ask() {
     if [ -z "$EMAIL" ]; then
         EMAIL=$(whiptail --inputbox "Enter your email (used by certbot for urgent renewal and security notices)" 8 78 --title "$DIALOG_TITLE" 3>&1 1>&2 2>&3)
 
@@ -69,6 +65,49 @@ ubuntu_install() {
         fi
     fi
 
+}
+
+
+debian_install() {
+    apt-get update
+
+    # install whiptail if not present
+    [ `dpkg -l | grep '\swhiptail\s\s' | wc -l` -eq 1 ] || apt-get install whiptail -y
+
+    whiptail_ask
+
+    ubuntu_install_nginx
+    ubuntu_install_certbot
+    setup_certbot
+    echo "HTTPS set up successfully!"
+    exit
+}
+
+debian_install_nginx() {
+    STEP=inginx
+    apt-get install nginx -y
+}
+
+debian_install_certbot() {
+    STEP=icertbot
+
+    # install wget if not present
+    [ `dpkg -l | grep '\swget\s\s' | wc -l` -eq 1 ] || apt-get install wget -y
+
+    wget https://dl.eff.org/certbot-auto
+    chmod a+x certbot-auto
+    mv certbot-auto /usr/local/sbin/certbot
+}
+
+
+ubuntu_install() {
+    apt-get update
+
+    # install whiptail if not present
+    [ `dpkg -l | grep '\swhiptail\s\s' | wc -l` -eq 1 ] || apt-get install whiptail -y
+
+    whiptail_ask
+
     ubuntu_install_nginx
     ubuntu_install_certbot
     setup_certbot
@@ -89,7 +128,7 @@ ubuntu_install_nginx() {
 }
 
 ubuntu_install_certbot() {
-    step=icertbot
+    STEP=icertbot
     [ `dpkg -l | grep '\spython-certbot-nginx\s\s' | wc -l` -eq 1 ] && return
 
     apt-get install software-properties-common -y || die software-properties-common
@@ -100,7 +139,7 @@ ubuntu_install_certbot() {
 
 
 die() {
-    echo "!!! SOMETHING WENT WRONG ($OS $STEP $1) !!!"
+    echo "!!! SOMETHING WENT WRONG ($DISTRO $STEP $1) !!!"
     exit
 }
 
