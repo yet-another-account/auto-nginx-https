@@ -146,6 +146,10 @@ ubuntu_install_certbot() {
 }
 
 nginx_config() {
+    nginx_config_file | sed "s/SERVERNAME/$DOMAIN/" | sed "s/IPORT/$PORT/" > /etc/nginx/sites-enabled/default
+}
+
+nginx_config_file() {
     cat<<EOF
 server {
 listen 80;
@@ -162,7 +166,8 @@ server_name SERVERNAME;
     proxy_read_timeout 90;
   }
 }
-EOF | sed "s/SERVERNAME/$DOMAIN/" | sed "s/IPORT/$PORT/" > /etc/nginx/sites-enabled/default
+EOF
+
 }
 
 
