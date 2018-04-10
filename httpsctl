@@ -59,7 +59,7 @@ ubuntu_install() {
         if (whiptail --title "$DIALOG_TITLE" --yesno "Please read the Terms of Service at https://letsencrypt.org/documents/LE-SA-v1.2-November-15-2017.pdf. You must agree in order to register with the ACME server at https://acme-v01.api.letsencrypt.org/directory. Select YES to accept the ToS." 11 78) then
             echo "TOS Agreed!"
         else
-            whiptail --title "$DIALOG_TITLE" --msgbox "You must agree with ToS to use CertBot!" 8 78
+            whiptail --title "$DIALOG_TITLE" --msgbox "You must accept the Terms of Service to use CertBot!" 8 78
             exit
         fi
     fi
