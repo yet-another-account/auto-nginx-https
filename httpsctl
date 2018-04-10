@@ -85,18 +85,19 @@ debian_install() {
 
 debian_install_nginx() {
     STEP=inginx
-    apt-get install nginx -y
+
+    apt-get install nginx -y || die install
 }
 
 debian_install_certbot() {
     STEP=icertbot
 
     # install wget if not present
-    [ `dpkg -l | grep '\swget\s\s' | wc -l` -eq 1 ] || apt-get install wget -y
+    [ `dpkg -l | grep '\swget\s\s' | wc -l` -eq 1 ] || apt-get install wget -y || die iwget
 
-    wget https://dl.eff.org/certbot-auto
-    chmod a+x certbot-auto
-    mv certbot-auto /usr/local/sbin/certbot
+    wget https://dl.eff.org/certbot-auto || die dl
+    chmod a+x certbot-auto || die chmod
+    mv certbot-auto /usr/local/sbin/certbot || die mv
 }
 
 
