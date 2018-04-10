@@ -16,7 +16,12 @@ done
 DIALOG_TITLE="HTTPS Setup"
 
 install() {
-    [ -e /etc/lsb-release ] && ubuntu_install
+    DISTRO=$(grep ^NAME /etc/os-release | sed 's/NAME=//g' | tr -d '="\n')
+
+    [ "$DISTRO" = "Ubuntu" ] && ubuntu_install ||
+
+
+    echo "Sorry! This script doesn't support this platform. "
 }
 
 setup_certbot() {
