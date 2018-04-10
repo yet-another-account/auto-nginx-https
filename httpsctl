@@ -87,6 +87,8 @@ debian_install_nginx() {
     STEP=inginx
 
     apt-get install nginx -y || die install
+
+    nginx_config
 }
 
 debian_install_certbot() {
@@ -125,7 +127,7 @@ ubuntu_install_nginx() {
     apt-get update || die aptupdate
     apt-get install nginx -y || die install
 
-    sed "s/SERVERNAME/$DOMAIN/" < nginx.conf > /etc/nginx/sites-enabled/default
+    nginx_config
 }
 
 ubuntu_install_certbot() {
@@ -136,6 +138,26 @@ ubuntu_install_certbot() {
     add-apt-repository ppa:certbot/certbot -y || die ppa
     apt-get update || die aptupdate
     apt-get install python-certbot-nginx -y || die install
+}
+
+nginx_config() {
+    cat<<EOF
+server {
+listen 80;
+server_name SERVERNAME;
+
+  location / {
+
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    proxy_pass http://localhost:14265;
+    proxy_read_timeout 90;
+  }
+}
+EOF | sed "s/SERVERNAME/$DOMAIN/" > /etc/nginx/sites-enabled/default
 }
 
 
