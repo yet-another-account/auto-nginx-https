@@ -14,7 +14,7 @@ install() {
 
 setup_certbot() {
     STEP=certbot
-    certbot --nginx --email "$EMAIL" -d "$DOMAIN" || die certbotsetup
+    certbot --nginx --email "$EMAIL" -d "$DOMAIN" -n || die certbotsetup
 
     # install crontab if not already installed
     crontab -l | grep -q "15 02 * * * `which certbot` renew" || autorenew_crontab
