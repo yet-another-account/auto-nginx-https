@@ -27,6 +27,9 @@ autorenew_crontab() {
 ubuntu_install() {
     OS=ubuntu
 
+    # install whiptail if not present
+    [ `dpkg -l | grep '\snginx\s\s' | wc -l` -eq 1 ] || apt-get install whiptail
+
     EMAIL=$(whiptail --inputbox "Enter your email (used by certbot for urgent renewal and security notices)" 8 78 --title "$DIALOG_TITLE" 3>&1 1>&2 2>&3)
 
     if [ $? -ne 0 ]; then
