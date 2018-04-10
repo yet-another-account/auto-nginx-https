@@ -5,11 +5,17 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
+while getopts 'e:d:' flag; do
+  case "${flag}" in
+    e) EMAIL="${OPTARG}" ;;
+    d) DOMAIN="${OPTARG}" ;;
+  esac
+done
+
 DIALOG_TITLE="HTTPS Setup"
 
 install() {
     [ -e /etc/lsb-release ] && ubuntu_install
-
 }
 
 setup_certbot() {
@@ -30,14 +36,14 @@ ubuntu_install() {
     # install whiptail if not present
     [ `dpkg -l | grep '\swhiptail\s\s' | wc -l` -eq 1 ] || apt-get install whiptail
 
-    EMAIL=$(whiptail --inputbox "Enter your email (used by certbot for urgent renewal and security notices)" 8 78 --title "$DIALOG_TITLE" 3>&1 1>&2 2>&3)
+    [ -z "$EMAIL" ] && EMAIL=$(whiptail --inputbox "Enter your email (used by certbot for urgent renewal and security notices)" 8 78 --title "$DIALOG_TITLE" 3>&1 1>&2 2>&3)
 
     if [ $? -ne 0 ]; then
         whiptail --title "$DIALOG_TITLE" --msgbox "You must provide an email!" 8 78
         exit
     fi
 
-    DOMAIN=$(whiptail --inputbox 'Enter your domain (NOT IP!) that points to this IP (comma separated)' 8 78 --title "$DIALOG_TITLE" 3>&1 1>&2 2>&3)
+    [ -z "$DOMAIN" ] && DOMAIN=$(whiptail --inputbox 'Enter your domain (NOT IP!) that points to this IP (comma separated)' 8 78 --title "$DIALOG_TITLE" 3>&1 1>&2 2>&3)
 
     if [ $? -ne 0 ]; then
         whiptail --title "$DIALOG_TITLE" --msgbox "You must provide domain(s)!" 8 78
