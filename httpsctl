@@ -21,7 +21,7 @@ install() {
 
 setup_certbot() {
     STEP=certbot
-    certbot --nginx --email "$EMAIL" -d "$DOMAIN" -n --agree-tos --no-redirect || die certbotsetup
+    certbot --nginx --email "$EMAIL" -d "$DOMAIN" -n --agree-tos || die certbotsetup
 
     # install crontab if not already installed
     crontab -l | grep -q "15 02 * * * `which certbot` renew" || autorenew_crontab
@@ -76,6 +76,7 @@ ubuntu_install_nginx() {
     [ `dpkg -l | grep '\snginx\s\s' | wc -l` -eq 1 ] && return
 
     add-apt-repository "deb http://nginx.org/packages/ubuntu/ $(lsb_release -s -c) main" -y || die addrepo
+    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62
     apt-get update || die aptupdate
     apt-get install nginx -y || die install
 
