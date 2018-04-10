@@ -5,10 +5,11 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
-while getopts 'e:d:' flag; do
+while getopts 'e:d:t' flag; do
   case "${flag}" in
     e) EMAIL="${OPTARG}" ;;
     d) DOMAIN="${OPTARG}" ;;
+    t) TOS="yes" ;;
   esac
 done
 
@@ -20,7 +21,7 @@ install() {
 
 setup_certbot() {
     STEP=certbot
-    certbot --nginx --email "$EMAIL" -d "$DOMAIN" -n || die certbotsetup
+    certbot --nginx --email "$EMAIL" -d "$DOMAIN" -n --agree-tos --no-redirect || die certbotsetup
 
     # install crontab if not already installed
     crontab -l | grep -q "15 02 * * * `which certbot` renew" || autorenew_crontab
@@ -51,6 +52,14 @@ ubuntu_install() {
         if [ $? -ne 0 ]; then
             whiptail --title "$DIALOG_TITLE" --msgbox "You must provide domain(s)!" 8 78
             exit
+        fi
+    fi
+
+    if [ -z "$TOS" ]; then
+        if (whiptail --title "$DIALOG_TITLE" --yesno "Please read the Terms of Service at https://letsencrypt.org/documents/LE-SA-v1.2-November-15-2017.pdf. You must agree in order to register with the ACME server at https://acme-v01.api.letsencrypt.org/directory" 8 78) then
+            echo "TOS Agreed!"
+        else
+            whiptail --title "$DIALOG_TITLE" --msgbox "You must agree with ToS to use CertBot!" 8 78
         fi
     fi
 
