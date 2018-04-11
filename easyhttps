@@ -146,23 +146,23 @@ ubuntu_install_certbot() {
 }
 
 nginx_config() {
-    nginx_config_file | sed "s/SERVERNAME/$DOMAIN/" | sed "s/IPORT/$PORT/" > /etc/nginx/sites-enabled/default
+    nginx_config_file > /etc/nginx/sites-enabled/default
 }
 
 nginx_config_file() {
     cat<<EOF
 server {
 listen 80;
-server_name SERVERNAME;
+server_name $DOMAIN;
 
   location / {
 
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host \$host;
+    proxy_set_header X-Real-IP \$remote_addr;
+    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto \$scheme;
 
-    proxy_pass http://localhost:IPORT;
+    proxy_pass http://$DOMAIN:$PORT;
     proxy_read_timeout 90;
   }
 }
