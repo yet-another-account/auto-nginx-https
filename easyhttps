@@ -156,6 +156,8 @@ listen 80;
 server_name $DOMAIN;
 
   location / {
+  
+    add_header "Access-Control-Allow-Origin"  *;
 
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
