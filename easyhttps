@@ -84,8 +84,8 @@ debian_install() {
 
     whiptail_ask
 
-    ubuntu_install_nginx
-    ubuntu_install_certbot
+    debian_install_nginx
+    debian_install_certbot
     setup_certbot
     echo "HTTPS set up successfully!"
     exit
