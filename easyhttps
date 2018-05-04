@@ -80,6 +80,7 @@ debian_install() {
     [ `dpkg -l | grep '\swhiptail\s\s' | wc -l` -eq 1 ] || apt-get install whiptail -y
     
     [ `dpkg -l | grep '\ssoftware-properties-common\s\s' | wc -l` -eq 1 ] || apt-get install software-properties-common -y
+    [ `dpkg -l | grep '\sdirmngr\s\s' | wc -l` -eq 1 ] || apt-get install dirmngr -y
 
     whiptail_ask
 
@@ -117,6 +118,7 @@ ubuntu_install() {
     [ `dpkg -l | grep '\swhiptail\s\s' | wc -l` -eq 1 ] || apt-get install whiptail -y
     
     [ `dpkg -l | grep '\ssoftware-properties-common\s\s' | wc -l` -eq 1 ] || apt-get install software-properties-common -y
+    [ `dpkg -l | grep '\sdirmngr\s\s' | wc -l` -eq 1 ] || apt-get install dirmngr -y
 
     whiptail_ask
 
