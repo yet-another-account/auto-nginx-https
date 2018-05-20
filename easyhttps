@@ -67,7 +67,16 @@ whiptail_ask() {
     fi
 
     if [ -z "$PORT" ]; then
-        PORT=$(whiptail --inputbox 'Enter your current node API port. HTTPS will be availiable on port 443.' 8 78 --title "$DIALOG_TITLE" "14265" 3>&1 1>&2 2>&3)
+
+        # iri playbook default
+        nc -z localhost 14267
+        if [ $? -eq 0 ]; then
+            DEFAULT_PORT=14267
+        else
+            DEFAULT_PORT=14265
+        fi
+
+        PORT=$(whiptail --inputbox 'Enter your current node API port. HTTPS will be availiable on port 443.' 8 78 --title "$DIALOG_TITLE" "$DEFAULT_PORT" 3>&1 1>&2 2>&3)
 
         if [ $? -ne 0 ]; then
             whiptail --title "$DIALOG_TITLE" --msgbox "You must provide your API port!" 8 78
