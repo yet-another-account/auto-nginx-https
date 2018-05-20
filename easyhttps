@@ -92,15 +92,16 @@ debian_install() {
 
     # install whiptail if not present
     [ `dpkg -l | grep '\swhiptail\s\s' | wc -l` -eq 1 ] || apt-get install whiptail -y
-    
+
     [ `dpkg -l | grep '\ssoftware-properties-common\s\s' | wc -l` -eq 1 ] || apt-get install software-properties-common -y
     [ `dpkg -l | grep '\sdirmngr\s\s' | wc -l` -eq 1 ] || apt-get install dirmngr -y
 
     whiptail_ask
-    
+
     ufw_config
 
     debian_install_nginx
+    nginx_config
     debian_install_certbot
     setup_certbot
     echo "HTTPS set up successfully!"
@@ -111,8 +112,6 @@ debian_install_nginx() {
     STEP=inginx
 
     apt-get install nginx -y || die install
-
-    nginx_config
 }
 
 debian_install_certbot() {
@@ -132,15 +131,16 @@ ubuntu_install() {
 
     # install whiptail if not present
     [ `dpkg -l | grep '\swhiptail\s\s' | wc -l` -eq 1 ] || apt-get install whiptail -y
-    
+
     [ `dpkg -l | grep '\ssoftware-properties-common\s\s' | wc -l` -eq 1 ] || apt-get install software-properties-common -y
     [ `dpkg -l | grep '\sdirmngr\s\s' | wc -l` -eq 1 ] || apt-get install dirmngr -y
 
     whiptail_ask
-    
+
     ufw_config
 
     ubuntu_install_nginx
+    nginx_config
     ubuntu_install_certbot
     setup_certbot
     echo "HTTPS set up successfully!"
@@ -156,7 +156,6 @@ ubuntu_install_nginx() {
     apt-get update || die aptupdate
     apt-get install nginx -y || die install
 
-    nginx_config
 }
 
 ubuntu_install_certbot() {
@@ -170,7 +169,14 @@ ubuntu_install_certbot() {
 }
 
 nginx_config() {
+    if [ -f /etc/nginx/sites-enabled/default ]; then
+        if [ "$(nginx_config_file | sha256sum)" -ne "$(sha256sum /etc/nginx/sites-enabled/default)"]; then
+            rm /etc/nginx/sites-enabled/default
+            mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.old
+        fi
+    fi
     nginx_config_file > /etc/nginx/sites-enabled/default
+    systemctl restart nginx
 }
 
 nginx_config_file() {
@@ -180,7 +186,7 @@ listen 80;
 server_name $DOMAIN;
 
   location / {
-  
+
     add_header "Access-Control-Allow-Origin"  *;
 
     proxy_set_header Host \$host;
@@ -199,7 +205,7 @@ EOF
 ufw_config() {
   # autoconfigure ufw if found
   [ `dpkg -l | grep '\sufw\s\s' | wc -l` -eq 1 ] || return
-  
+
   ufw allow 80
   ufw allow 443
   ufw allow 14265
