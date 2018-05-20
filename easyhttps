@@ -67,7 +67,12 @@ whiptail_ask() {
     fi
 
     if [ -z "$PORT" ]; then
-        PORT=14265
+        PORT=$(whiptail --inputbox 'Enter your current node API port. HTTPS will be availiable on port 443.' 8 78 --title "$DIALOG_TITLE" "14265" 3>&1 1>&2 2>&3)
+
+        if [ $? -ne 0 ]; then
+            whiptail --title "$DIALOG_TITLE" --msgbox "You must provide your API port!" 8 78
+            exit
+        fi
     fi
 
 }
